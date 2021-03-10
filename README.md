@@ -7,5 +7,7 @@ Datasets were taken from Kaggle:
 
 https://www.kaggle.com/tzachymorad/cancer-cost-beginner-s-guide-prep-and-stacking
 
-![1](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIaYUq9UK_r6HFwh60wHuyc7jQHZKGh24v5A&usqp=CAU)
+![1](https://user-images.githubusercontent.com/73366841/110638460-44e83900-81b7-11eb-81ca-dba448fc6d74.jpg)
+
+
 
