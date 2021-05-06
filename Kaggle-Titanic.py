@@ -163,6 +163,7 @@ class AveragingModels:
         return ((y == y_pred).sum() / N)
             
 if __name__ == '__main__':
+    #read data
     train = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\titanic\train.csv')
     test = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\titanic\test.csv')
     # removing NaN
@@ -172,42 +173,34 @@ if __name__ == '__main__':
     train = outliers(train)  # removing outliers
 
     df = pd.concat([train, test], axis=0).reset_index(drop=True)
-
     id_ = test.PassengerId
     df = feature_eng(df)
-
     y_train_org = df.iloc[:len(train), 0]
     x_train_org = df.iloc[:len(train), 1:]
-    cal_test = df.iloc[len(train):, 1:]
-    x_train_org, cal_test = normal(x_train_org, cal_test)
-    # mode = cross_val(x_train, y_train)
+    test = df.iloc[len(train):, 1:]
+    x_train_org, test = normal(x_train_org, test)
     x_train, x_test, y_train, y_test = train_test_split(x_train_org, y_train_org)
+    mode = cross_val(x_train, y_train) # finding the best algorithm and parameters to test
+    
     GBoost = GradientBoostingClassifier(learning_rate=0.2, max_depth=8, max_features=0.1,
                            min_samples_leaf=150, n_estimators=1000)
-    GBoost.fit(x_train, y_train)
-    print(f"Train accuarcy using only Gradient Boost  {GBoost.score(x_train, y_train)*100:.3f}%")
-    print(f"Test accuarcy using only Gradient Boost {GBoost.score(x_test, y_test)*100:.3f}%")
-    y_pred_boos = GBoost.predict(cal_test).astype(np.int64)
-
+    epochs = 100
+    gb_test_score = []
+    for i in range(epochs):
+        GBoost.fit(x_train, y_train)
+        gb_test_score.append(GBoost.score(x_test, y_test))
+    print(f"Test accuarcy using only Gradient Boost {np.mean(gb_test_score)*100:.3f}%")
+        
     AdaB = AdaBoostClassifier()
     Forest = RandomForestClassifier()
-
     av = AveragingModels([AdaB, GBoost, Forest])
-
-    av.fit(x_train, y_train)
+    
     test_score = []
-    for i in range(10):
+    for i in range(epochs):
+        av.fit(x_train, y_train)
         y_pred = av.predict(x_test).astype(np.int64)
         test_score.append(av.score(y_pred, y_test))
     print(f"Accuracy of test data using average model is {np.mean(test_score)*100:.3f}%")
     
-    av.fit(x_train_org, y_train_org)
-    y_test_pred = av.predict(cal_test).astype(np.int64)
-    
-    # submission
-# =============================================================================
-#     submission = pd.DataFrame({'PassengerId': id_, 'Survived': y_pred})
-#     submission.to_csv('submission.csv', index=False)
-#     submission = pd.read_csv('submission.csv')
-#     print(submission)
-# =============================================================================
+    av.fit(x_train, y_train)
+    y_test_pred = av.predict(test).astype(np.int64)
