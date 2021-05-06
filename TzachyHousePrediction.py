@@ -17,8 +17,8 @@ import lightgbm as lgb
 
 
 def import_data():
-    train = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Excercies\Kaggle\House Price\train.csv')
-    test = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Excercies\Kaggle\House Price\test.csv')
+    train = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\House Price\train.csv')
+    test = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\House Price\test.csv')
     return train, test
 
 def data_prep():
@@ -242,6 +242,7 @@ def stacking(models, x_train, x_test, y_train):
     stack = StackingRegressor(estimators=estimators_, final_estimator=RandomForestRegressor(n_estimators=10,
                                                                                             random_state = 42))
     stack.fit(x_train, y_train)
+    print(stack.score)
     y_pred = stack.predict(x_test)
     return y_pred
 
@@ -278,22 +279,21 @@ def average_stacking(train, y_train):
 if __name__ == "__main__":
 
     train, test, y_train, id_test = data_prep()
-    y_train = np.log1p(y_train)
+    y_train = np.log1p(y_train) #Fix skew data
     train, test = normal(train, test)    # Normal the data
-    #y_pred_average = average_stacking(train, y_train)
+    y_pred_average = average_stacking(train, y_train)
 
     models = cross_val_models(train, y_train, cv_param=6)
     y_pred = stacking(models, train, test, y_train)
-    y_pred = np.exp(y_pred)
+    y_pred = np.exp(y_pred) #cancel the log we implmented
 
-    submission = pd.DataFrame({'Id': id_test, 'SalePrice': y_pred})
-
-    submission.to_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Excercies\Kaggle\House Price\test.submission.csv',
-                      index=False)
-
-    submission = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Excercies\Kaggle\House Price\test.submission.csv')
-
-    print(submission)
-
-
-
+# =============================================================================
+#     submission = pd.DataFrame({'Id': id_test, 'SalePrice': y_pred})
+# 
+#     submission.to_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\House Price\test.submission.csv',
+#                       index=False)
+# 
+#     submission = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\House Price\test.submission.csv')
+# 
+#     print(submission)
+# =============================================================================
