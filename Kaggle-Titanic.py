@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Dec  3 12:30:38 2020
 
-@author: Tzachy
-"""
 
 import numpy as np
 import pandas as pd
@@ -163,10 +158,13 @@ class AveragingModels:
         predictions = np.column_stack([model.predict(X) for model in self.models])
         return np.mean(predictions, axis=1).round()
 
-
+    def score(self, y_pred, y):
+        N = y.shape[0]
+        return ((y == y_pred).sum() / N)
+            
 if __name__ == '__main__':
-    train = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Excercies\Kaggle\titanic\train.csv')
-    test = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Excercies\Kaggle\titanic\test.csv')
+    train = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\titanic\train.csv')
+    test = pd.read_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\titanic\test.csv')
     # removing NaN
     test = fill_nan(test)
     train = fill_nan(train)
@@ -187,8 +185,8 @@ if __name__ == '__main__':
     GBoost = GradientBoostingClassifier(learning_rate=0.2, max_depth=8, max_features=0.1,
                            min_samples_leaf=150, n_estimators=1000)
     GBoost.fit(x_train, y_train)
-    print(GBoost.score(x_train, y_train))
-    print(GBoost.score(x_test, y_test))
+    print(f"Train accuarcy using only Gradient Boost  {GBoost.score(x_train, y_train)*100:.3f}%")
+    print(f"Test accuarcy using only Gradient Boost {GBoost.score(x_test, y_test)*100:.3f}%")
     y_pred_boos = GBoost.predict(cal_test).astype(np.int64)
 
     AdaB = AdaBoostClassifier()
@@ -196,12 +194,20 @@ if __name__ == '__main__':
 
     av = AveragingModels([AdaB, GBoost, Forest])
 
+    av.fit(x_train, y_train)
+    test_score = []
+    for i in range(10):
+        y_pred = av.predict(x_test).astype(np.int64)
+        test_score.append(av.score(y_pred, y_test))
+    print(f"Accuracy of test data using average model is {np.mean(test_score)*100:.3f}%")
+    
     av.fit(x_train_org, y_train_org)
-
-    y_pred = av.predict(cal_test).astype(np.int64)
-
+    y_test_pred = av.predict(cal_test).astype(np.int64)
+    
     # submission
-    submission = pd.DataFrame({'PassengerId': id_, 'Survived': y_pred})
-    submission.to_csv('submission.csv', index=False)
-    submission = pd.read_csv('submission.csv')
-    print(submission)
+# =============================================================================
+#     submission = pd.DataFrame({'PassengerId': id_, 'Survived': y_pred})
+#     submission.to_csv('submission.csv', index=False)
+#     submission = pd.read_csv('submission.csv')
+#     print(submission)
+# =============================================================================
