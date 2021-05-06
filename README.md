@@ -8,7 +8,7 @@ Analyzing dataset of credit card customers and predict which customers will likl
 
 Kaggle-Titanic.py
 
-Survival prediction on the Titanic Competition dataset. Classification problem approached by data analysis work and feature engineering. The data was analyzed by averaging ensemble of random forest, Adaboost and Gradient boosting to achieve the highest accuracy score. 
+Utilized the Titanic dataset of survived passengers to understand if a collective of algorithms may achieve better results than one algorithms. I preprocessed the data and utilized random forest, gradient boosting and adaboost. The collective didn’t exhibit an improvement in accuracy.
 
 TzachyHousePrediction.py
 
