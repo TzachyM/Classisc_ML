@@ -4,7 +4,7 @@ Datasets were taken from Kaggle:
 
 BankChurners_Skewed_data.py
 
-Analyzing highly skewed dataset of credit card customers and predict which customers will likly to be churning their card. I preproccesing by visual the data, dealing with outliers and NaN's, located which features had high skewness and feature engineering. 
+Analyzing dataset of credit card customers and predict which customers will likly to be churning their card. Classification problem in which I preproccesing by observing the data, dealing with outliers and NaN's, and feature engineering. 
 
 Kaggle-Titanic.py
 
@@ -12,7 +12,7 @@ Survival prediction on the Titanic Competition dataset. Classification problem a
 
 TzachyHousePrediction.py
 
-Housing Prices Prediction Competition. Prediction problem which I approached by preproccesing by visual the data, outliers and NaN's work and feature engineering. The data was analyzed by averaging ensemble of random forest, Adaboost and Gradient boosting to achieve the highest accuarcy score.  
+Housing Prices Prediction Competition. Regression problem which I approached by preproccesing by visual the data, outliers and NaN's work and feature engineering. The data was analyzed by averaging ensemble of random forest, Adaboost and Gradient boosting to achieve the highest accuarcy score.  
 
 Tzachy-CancerCostUS.py
 
