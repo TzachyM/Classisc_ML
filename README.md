@@ -12,7 +12,7 @@ Utilized the Titanic dataset of survived passengers to understand if a collectiv
 
 TzachyHousePrediction.py
 
-Housing Prices Prediction Competition. Regression problem which I approached by preproccesing by visual the data, outliers and NaN's work and feature engineering. The data was analyzed by averaging ensemble of random forest, Adaboost and Gradient boosting to achieve the highest accuarcy score.  
+Utilized the Housing Prices Prediction dataset to observe the difference between algorithms averaging and algorithms stacking. I preproccesed the data and utilized lightGBM, lasso and gradient boosting. Stacking was more effective to accurate predict the house prices.
 
 Tzachy-CancerCostUS.py
 
