@@ -12,7 +12,8 @@ from sklearn.linear_model import Lasso
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import make_pipeline
 from sklearn.base import BaseEstimator, TransformerMixin, RegressorMixin, clone
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
+
 import lightgbm as lgb
 
 
@@ -28,7 +29,6 @@ def data_prep():
     #Divding data
     id_test = test.Id
     y_train = train.SalePrice
-
     df = pd.concat([train, test]).reset_index(drop=True).drop(['Id', 'SalePrice'], axis=1)
     # Visual data
     #visual(train)
@@ -42,7 +42,6 @@ def feat_engineering(df):
     #Fill NaN
     df = fill_na(df)
     #Features
-
     df = binary_fix(df, 'Condition1', 'Norm')
     df = binary_fix(df, 'Condition2', 'Norm')
     df['Condition'] = df.Condition1 + df.Condition2
@@ -155,8 +154,8 @@ def visual(df):
 
 def rmsle_cv(model, train, y_train):
     kf = KFold(5, shuffle=True, random_state=42).get_n_splits(train)
-    rmse = np.sqrt(-cross_val_score(model, train, y_train, scoring="neg_mean_squared_error", cv = kf))
-    return rmse
+    r2 = np.sqrt(-cross_val_score(model, train, y_train, scoring="r2", cv = kf))
+    return r2
 
 
 class AveragingModels:
@@ -171,7 +170,8 @@ class AveragingModels:
     def predict(self, X):
         predictions = np.column_stack([ model.predict(X) for model in self.models ])
         return np.mean(predictions, axis=1)
-
+    
+    
 def cross_val_models(x_train, y_train, cv_param=5):
     ABR = AdaBoostRegressor()
     GBR = GradientBoostingRegressor()
@@ -192,12 +192,12 @@ def cross_val_models(x_train, y_train, cv_param=5):
     RF = RandomForestRegressor(max_depth=8, min_samples_leaf=2, n_estimators=800)
     models = [ABR, GBR, RF, Las]
     for model in models:    # Cross validation of the train data with the different models
-        cv_results = -cross_val_score(model, x_train, y_train, cv=cv_param, scoring='neg_mean_absolute_error')
+        cv_results = -cross_val_score(model, x_train, y_train, cv=cv_param, scoring='r2')
         mean_cv = cv_results.mean()
         model_name = type(model).__name__
         if model_name == 'Pipeline':
             model_name = 'Lasso'
-        print(f'The mean absolute error for {model_name} is {mean_cv}')
+        print(f'The r2 for {model_name} is {mean_cv}')
     return models
 
 # Hyperparameters scan using GridSearchCV (Note, this process take a couple of minutes even with an 8 core computer)
@@ -235,19 +235,21 @@ def hyperparam(ABR, GBR, RF, x_train, y_train):
 # Stacking the models with a final regressor to achieve a better MSE:
 ## Stacking allows us to use each individual estimator by using their output as input of a final estimator.
 
-def stacking(models, x_train, x_test, y_train):
+def stacking(models, x_train, x_test, y_train, test):
     estimators_ = []
     for model in models:
         estimators_.append((str(model), model))
     stack = StackingRegressor(estimators=estimators_, final_estimator=RandomForestRegressor(n_estimators=10,
                                                                                             random_state = 42))
     stack.fit(x_train, y_train)
-    print(stack.score)
+    print("R2 Score for stacking models with train data",stack.score(x_train, y_train))
     y_pred = stack.predict(x_test)
-    return y_pred
+    print("R2 Score for stacking models with test data",stack.score(x_test, y_pred))
+    y_pred_stack = stack.predict(test)
+    return y_pred_stack
 
 
-def average_stacking(train, y_train):
+def average_stacking(x_train, y_train, x_test, y_test):
     lasso = make_pipeline(RobustScaler(), Lasso(alpha=0.0005, random_state=1))
 
     GBoost = GradientBoostingRegressor(n_estimators=3000, learning_rate=0.05,
@@ -262,17 +264,18 @@ def average_stacking(train, y_train):
                                   feature_fraction_seed=9, bagging_seed=9,
                                   min_data_in_leaf=6, min_sum_hessian_in_leaf=11)
 
-    score = rmsle_cv(GBoost, train, y_train)
-    print("Gradient Boosting score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
-    score = rmsle_cv(model_lgb, train, y_train)
-    print("LGBM score: {:.4f} ({:.4f})\n".format(score.mean(), score.std()))
+    score = rmsle_cv(GBoost, x_train, y_train)
+    print(f"Gradient Boosting R2 score with train data: {score.mean():.4f} | std: ({score.std():.4f})\n")
+    score = rmsle_cv(model_lgb, x_train, y_train)
+    print("LGBM R2 score with train data: {score.mean():.4f} ({score.std():.4f})\n")
 
     av = AveragingModels([model_lgb, GBoost, lasso])
 
-    av.fit(train, y_train)
-
-    y_pred = av.predict(test)
-
+    av.fit(x_train, y_train)
+    
+    y_pred = av.predict(x_test)
+    avg_score = r2_score(y_test, y_pred)
+    print("Average score of LGBM, Gradient boosting and Lasso with test data", avg_score)
     return y_pred
 
 
@@ -280,15 +283,17 @@ if __name__ == "__main__":
 
     train, test, y_train, id_test = data_prep()
     y_train = np.log1p(y_train) #Fix skew data
-    train, test = normal(train, test)    # Normal the data
-    y_pred_average = average_stacking(train, y_train)
+    train, test = normal(train, test)    # Normalize the data
+    x_train, x_test, y_train, y_test = train_test_split(train, y_train)
+    y_pred_average = average_stacking(x_train, y_train, x_test, y_test)
 
-    models = cross_val_models(train, y_train, cv_param=6)
-    y_pred = stacking(models, train, test, y_train)
-    y_pred = np.exp(y_pred) #cancel the log we implmented
+    models = cross_val_models(x_train, y_train, cv_param=6)
+    y_pred = stacking(models, x_train, x_test, y_train, test)
+    y_pred_stack = np.exp(y_pred) #cancel the log we implmented
+
 
 # =============================================================================
-#     submission = pd.DataFrame({'Id': id_test, 'SalePrice': y_pred})
+#     submission = pd.DataFrame({'Id': id_test, 'SalePrice': y_pred_stack})
 # 
 #     submission.to_csv(r'C:\Users\tzach\Dropbox\DS\Primrose\Exercises\Kaggle\House Price\test.submission.csv',
 #                       index=False)
@@ -297,3 +302,4 @@ if __name__ == "__main__":
 # 
 #     print(submission)
 # =============================================================================
+
