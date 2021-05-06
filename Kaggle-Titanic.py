@@ -1,5 +1,3 @@
-
-
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -31,10 +29,10 @@ def outliers(train, v=2):
 
 def fill_nan(df):
     # check for missing data
-    # total = train.isnull().sum().sort_values(ascending=False)
-    # percent = (train.isnull().sum()/train.isnull().count()).sort_values(ascending=False)
-    # missing_data = pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])
-    # print(missing_data.head(5))
+    total = train.isnull().sum().sort_values(ascending=False)
+    percent = (train.isnull().sum()/train.isnull().count()).sort_values(ascending=False)
+    missing_data = pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])
+    print(missing_data.head(5))
     df.Cabin = [df.Cabin[i][0] if not pd.isnull(df.Cabin[i]) else '0' for i in range(df.shape[0])]
     index_NaN_age = list(df["Age"][df["Age"].isnull()].index)
     for i in index_NaN_age:
@@ -83,7 +81,7 @@ def feature_eng(df):
     df.family_size = pd.cut(df.family_size, bins, labels=labels, include_lowest=True)
     df['IsAlone'] = 1
     df['IsAlone'].loc[df['family_size'] != 'Single'] = 0
-    #sns.catplot('family_size', 'Survived', data=df, kind="bar")
+    sns.catplot('family_size', 'Survived', data=df, kind="bar")
     # Ticket
     Ticket = []
     for i in list(df.Ticket):
