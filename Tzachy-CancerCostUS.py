@@ -14,7 +14,7 @@ from sklearn.ensemble import StackingRegressor  # Stacking for linear regression
 
 
 # Reading data from CSV:
-## As you can from looking at the data, we have a big flaw in the data. The first rows needs to be removed because of
+## As you can see from looking at the data, we have a big flaw in the data. The first rows needs to be removed because of
 ## the needless heading. Thus, we are changing the rows to have a normal dataframe
 
 def data_read():
