@@ -1,3 +1,4 @@
+
 ## Classisc_ML
 Classic ML models and implementation using mainly Scikit-learn, Pandas, SeaBorn, NumPy, Matplotlib and more. 
 Datasets were taken from Kaggle:
@@ -20,7 +21,7 @@ Cancer Treatment cost dataset analyzed by Preprocceing and Stacking. The data is
 
 https://www.kaggle.com/tzachymorad/cancer-cost-beginner-s-guide-prep-and-stacking
 
-![1](https://user-images.githubusercontent.com/73366841/110638460-44e83900-81b7-11eb-81ca-dba448fc6d74.jpg)
+![1](https://user-images.githubusercontent.com/73366841/117571014-6ee5ab00-b0d5-11eb-8b43-afa2dd17196d.jpg)
 
 
 
