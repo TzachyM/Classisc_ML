@@ -9,7 +9,7 @@ Analyzing dataset of credit card customers and predict which customers will likl
 
 Kaggle-Titanic.py
 
-Utilized the Titanic dataset of survived passengers to understand if a collective of algorithms may achieve better results than one algorithms. I preprocessed the data and utilized random forest, gradient boosting and adaboost. The collective didn’t exhibit an improvement in accuracy.
+Utilized the Titanic dataset of survived passengers to understand if a collective of algorithms may achieve better results than one algorithms. I preprocessed the data and utilized random forest, gradient boosting and adaboost. The ensemble didn’t exhibit an improvement in accuracy.
 
 TzachyHousePrediction.py
 
